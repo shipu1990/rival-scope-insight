@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Building2, Target, Calendar, Sparkles, CalendarIcon } from 'lucide-react';
+import { Building2, Calendar, FileText, CalendarIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TimeframeOption } from '@/types/analytics';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -7,98 +7,76 @@ import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
-interface CompareFormProps {
-  onCompare: (companyUrl: string, competitorUrl: string, timeframe: TimeframeOption, startDate?: Date, endDate?: Date) => void;
+interface MonthlyReportFormProps {
+  onGenerate: (pageUrl: string, timeframe: TimeframeOption, startDate?: Date, endDate?: Date) => void;
   isLoading?: boolean;
 }
 
-const timeframeOptions: { value: TimeframeOption; label: string }[] = [
-  { value: '7days', label: 'Last 7 Days' },
-  { value: '30days', label: 'Last 30 Days' },
-  { value: '60days', label: 'Last 60 Days' },
-  { value: 'previous_month', label: 'Previous Month' },
-  { value: 'previous_2_months', label: 'Previous 2 Months' },
-  { value: 'previous_quarter', label: 'Previous Quarter' },
+const monthlyTimeframeOptions: { value: TimeframeOption; label: string }[] = [
+  { value: 'previous_month', label: 'Last Month' },
+  { value: 'previous_2_months', label: 'Last 2 Months' },
+  { value: 'previous_quarter', label: 'Last Quarter' },
   { value: 'custom', label: 'Custom Range' },
 ];
 
-export const CompareForm = ({ onCompare, isLoading }: CompareFormProps) => {
-  const [companyUrl, setCompanyUrl] = useState('');
-  const [competitorUrl, setCompetitorUrl] = useState('');
-  const [timeframe, setTimeframe] = useState<TimeframeOption>('30days');
+export const MonthlyReportForm = ({ onGenerate, isLoading }: MonthlyReportFormProps) => {
+  const [pageUrl, setPageUrl] = useState('');
+  const [timeframe, setTimeframe] = useState<TimeframeOption>('previous_month');
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (companyUrl && competitorUrl) {
-      onCompare(companyUrl, competitorUrl, timeframe, startDate, endDate);
+    if (pageUrl) {
+      onGenerate(pageUrl, timeframe, startDate, endDate);
     }
   };
 
   return (
     <div className="chart-container animate-fade-in">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
-          <Sparkles className="h-5 w-5 text-primary" />
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20">
+          <FileText className="h-5 w-5 text-accent" />
         </div>
         <div>
-          <h2 className="text-lg font-semibold text-foreground">Compare Social Pages</h2>
-          <p className="text-sm text-muted-foreground">Enter your page and a competitor's page to analyze</p>
+          <h2 className="text-lg font-semibold text-foreground">Generate Monthly Report</h2>
+          <p className="text-sm text-muted-foreground">Analyze a single page's performance over time</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Company URL */}
-          <div>
-            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-              <Building2 className="h-4 w-4 text-primary" />
-              Your Page URL
-            </label>
-            <input
-              type="text"
-              value={companyUrl}
-              onChange={(e) => setCompanyUrl(e.target.value)}
-              placeholder="e.g., facebook.com/yourcompany"
-              className="input-field"
-              required
-            />
-          </div>
-
-          {/* Competitor URL */}
-          <div>
-            <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
-              <Target className="h-4 w-4 text-chart-competitor" />
-              Competitor Page URL
-            </label>
-            <input
-              type="text"
-              value={competitorUrl}
-              onChange={(e) => setCompetitorUrl(e.target.value)}
-              placeholder="e.g., facebook.com/competitor"
-              className="input-field"
-              required
-            />
-          </div>
+        {/* Page URL */}
+        <div>
+          <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
+            <Building2 className="h-4 w-4 text-primary" />
+            Social Media Page URL
+          </label>
+          <input
+            type="text"
+            value={pageUrl}
+            onChange={(e) => setPageUrl(e.target.value)}
+            placeholder="e.g., facebook.com/yourcompany"
+            className="input-field"
+            required
+          />
         </div>
 
         {/* Timeframe Selection */}
         <div>
           <label className="mb-2 flex items-center gap-2 text-sm font-medium text-foreground">
             <Calendar className="h-4 w-4 text-accent" />
-            Timeframe
+            Report Period
           </label>
           <div className="flex flex-wrap gap-2">
-            {timeframeOptions.map((option) => (
+            {monthlyTimeframeOptions.map((option) => (
               <button
                 key={option.value}
                 type="button"
                 onClick={() => setTimeframe(option.value)}
                 className={`rounded-lg border px-3 py-1.5 text-sm font-medium transition-all ${
                   timeframe === option.value
-                    ? 'border-primary bg-primary/20 text-primary'
-                    : 'border-border bg-secondary/50 text-muted-foreground hover:border-primary/50'
+                    ? 'border-accent bg-accent/20 text-accent'
+                    : 'border-border bg-secondary/50 text-muted-foreground hover:border-accent/50'
                 }`}
               >
                 {option.label}
@@ -168,18 +146,18 @@ export const CompareForm = ({ onCompare, isLoading }: CompareFormProps) => {
         {/* Submit Button */}
         <Button
           type="submit"
-          disabled={!companyUrl || !competitorUrl || isLoading || (timeframe === 'custom' && (!startDate || !endDate))}
+          disabled={!pageUrl || isLoading || (timeframe === 'custom' && (!startDate || !endDate))}
           className="btn-primary w-full md:w-auto"
         >
           {isLoading ? (
             <>
               <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground border-t-transparent" />
-              Analyzing...
+              Generating...
             </>
           ) : (
             <>
-              <Sparkles className="mr-2 h-4 w-4" />
-              Generate Comparison
+              <FileText className="mr-2 h-4 w-4" />
+              Generate Report
             </>
           )}
         </Button>

@@ -37,6 +37,22 @@ export interface ComparisonData {
   };
   timeframe: string;
   generatedAt: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface MonthlyReportData {
+  page: {
+    name: string;
+    url: string;
+    metrics: SocialMetrics;
+    posts: PostData[];
+    dailyData: DailyMetric[];
+  };
+  timeframe: string;
+  generatedAt: string;
+  startDate: string;
+  endDate: string;
 }
 
 export interface DailyMetric {
@@ -48,11 +64,19 @@ export interface DailyMetric {
 
 export interface Report {
   id: string;
+  mode: 'compare' | 'monthly';
   companyUrl: string;
-  competitorUrl: string;
+  competitorUrl?: string;
   timeframe: string;
   createdAt: string;
-  data: ComparisonData;
+  startDate: string;
+  endDate: string;
+  data?: ComparisonData | MonthlyReportData;
 }
 
-export type TimeframeOption = '7days' | '30days' | 'custom';
+export type TimeframeOption = '7days' | '30days' | '60days' | 'previous_month' | 'previous_2_months' | 'previous_quarter' | 'custom';
+
+export interface DateRange {
+  startDate: Date | undefined;
+  endDate: Date | undefined;
+}
