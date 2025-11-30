@@ -10,8 +10,11 @@ import { TopPosts } from '@/components/dashboard/TopPosts';
 import { MonthlyMetricsTable } from '@/components/dashboard/MonthlyMetricsTable';
 import { SinglePageChart } from '@/components/dashboard/SinglePageChart';
 import { SinglePagePosts } from '@/components/dashboard/SinglePagePosts';
+import { ConnectedAccounts } from '@/components/social/ConnectedAccounts';
+import { EnhancedTopPosts } from '@/components/dashboard/EnhancedTopPosts';
 import { generateMockComparison, generateMonthlyReport } from '@/lib/mockData';
 import { generateComparisonPDF, generateMonthlyPDF } from '@/lib/pdfGenerator';
+import { generateEnhancedPosts } from '@/lib/socialMediaServices';
 import { ComparisonData, MonthlyReportData, TimeframeOption } from '@/types/analytics';
 import { Heart, Eye, Users, FileText, Download, GitCompare, CalendarRange } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -78,12 +81,19 @@ const Index = () => {
     { metric: 'Shares', company: comparisonData.company.metrics.shares, competitor: comparisonData.competitor.metrics.shares },
   ] : [];
 
+  // Generate enhanced posts for display
+  const enhancedCompanyPosts = comparisonData ? generateEnhancedPosts(15) : [];
+  const enhancedMonthlyPosts = monthlyData ? generateEnhancedPosts(15) : [];
+
   return (
     <MainLayout 
       title="Analytics Dashboard" 
       subtitle="Compare social media performance or generate monthly reports"
     >
       <div className="space-y-6">
+        {/* Connected Accounts Section */}
+        <ConnectedAccounts />
+
         <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'compare' | 'monthly')} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="compare" className="gap-2">
@@ -134,6 +144,13 @@ const Index = () => {
 
                 <MetricsTable companyMetrics={comparisonData.company.metrics} competitorMetrics={comparisonData.competitor.metrics} companyName={comparisonData.company.name} competitorName={comparisonData.competitor.name} />
                 <TopPosts companyPosts={comparisonData.company.posts} competitorPosts={comparisonData.competitor.posts} companyName={comparisonData.company.name} competitorName={comparisonData.competitor.name} />
+                
+                {/* Enhanced Top Posts with thumbnails and detailed metrics */}
+                <EnhancedTopPosts 
+                  posts={enhancedCompanyPosts} 
+                  title={`Top 15 Posts - ${comparisonData.company.name}`}
+                  maxPosts={15}
+                />
               </>
             )}
 
@@ -187,6 +204,13 @@ const Index = () => {
                 </div>
 
                 <SinglePagePosts posts={monthlyData.page.posts} pageName={monthlyData.page.name} />
+                
+                {/* Enhanced Top Posts with thumbnails and detailed metrics */}
+                <EnhancedTopPosts 
+                  posts={enhancedMonthlyPosts} 
+                  title={`Top 15 Posts - ${monthlyData.page.name}`}
+                  maxPosts={15}
+                />
               </>
             )}
 
