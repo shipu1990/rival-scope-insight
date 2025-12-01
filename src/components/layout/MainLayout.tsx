@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 
@@ -9,10 +9,12 @@ interface MainLayoutProps {
 }
 
 export const MainLayout = ({ children, title, subtitle }: MainLayoutProps) => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar />
-      <div className="ml-64 transition-all duration-300">
+      <Sidebar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
+      <div className={`transition-all duration-300 ${isCollapsed ? 'ml-20' : 'ml-64'}`}>
         <Header title={title} subtitle={subtitle} />
         <main className="p-6">{children}</main>
       </div>
