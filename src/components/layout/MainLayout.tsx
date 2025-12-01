@@ -12,7 +12,7 @@ export const MainLayout = ({ children, title, subtitle }: MainLayoutProps) => {
   return (
     <div className="min-h-screen bg-background">
       <Sidebar />
-      <div className="ml-64">
+      <div className="ml-64 transition-all duration-300">
         <Header title={title} subtitle={subtitle} />
         <main className="p-6">{children}</main>
       </div>

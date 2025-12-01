@@ -10,7 +10,6 @@ import { TopPosts } from '@/components/dashboard/TopPosts';
 import { MonthlyMetricsTable } from '@/components/dashboard/MonthlyMetricsTable';
 import { SinglePageChart } from '@/components/dashboard/SinglePageChart';
 import { SinglePagePosts } from '@/components/dashboard/SinglePagePosts';
-import { ConnectedAccounts } from '@/components/social/ConnectedAccounts';
 import { EnhancedTopPosts } from '@/components/dashboard/EnhancedTopPosts';
 import { generateMockComparison, generateMonthlyReport } from '@/lib/mockData';
 import { generateComparisonPDF, generateMonthlyPDF } from '@/lib/pdfGenerator';
@@ -91,9 +90,6 @@ const Index = () => {
       subtitle="Compare social media performance or generate monthly reports"
     >
       <div className="space-y-6">
-        {/* Connected Accounts Section */}
-        <ConnectedAccounts />
-
         <Tabs value={activeMode} onValueChange={(v) => setActiveMode(v as 'compare' | 'monthly')} className="w-full">
           <TabsList className="grid w-full max-w-md grid-cols-2">
             <TabsTrigger value="compare" className="gap-2">
