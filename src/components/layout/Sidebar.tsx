@@ -1,5 +1,7 @@
-import { BarChart3, Clock, FileText, Home, Settings, TrendingUp } from 'lucide-react';
+import { useState } from 'react';
+import { BarChart3, Clock, FileText, Home, Settings, TrendingUp, ChevronLeft, ChevronRight } from 'lucide-react';
 import { NavLink } from '@/components/NavLink';
+import { Button } from '@/components/ui/button';
 
 const navItems = [
   { icon: Home, label: 'Dashboard', path: '/' },
@@ -10,15 +12,24 @@ const navItems = [
 ];
 
 export const Sidebar = () => {
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r border-sidebar-border bg-sidebar">
+    <aside className={`fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border bg-sidebar transition-all duration-300 ${isCollapsed ? 'w-20' : 'w-64'}`}>
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary">
-            <TrendingUp className="h-5 w-5 text-primary-foreground" />
-          </div>
-          <span className="text-lg font-bold text-foreground">SocialPulse</span>
+          <button 
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            className="flex items-center gap-3 transition-all hover:opacity-80"
+          >
+            <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary">
+              <TrendingUp className="h-5 w-5 text-primary-foreground" />
+            </div>
+            {!isCollapsed && (
+              <span className="text-lg font-bold text-foreground whitespace-nowrap">Cave Door Pulse</span>
+            )}
+          </button>
         </div>
 
         {/* Navigation */}
@@ -31,20 +42,11 @@ export const Sidebar = () => {
               activeClassName="active"
             >
               <item.icon className="h-5 w-5" />
-              <span className="font-medium">{item.label}</span>
+              {!isCollapsed && <span className="font-medium">{item.label}</span>}
             </NavLink>
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="border-t border-sidebar-border p-4">
-          <div className="rounded-lg bg-secondary/50 p-4">
-            <p className="text-sm font-medium text-foreground">Pro Tip</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Schedule automated reports to stay ahead of your competition.
-            </p>
-          </div>
-        </div>
       </div>
     </aside>
   );

@@ -67,7 +67,7 @@ export const EnhancedTopPosts = ({ posts, title = "Top Performing Posts", maxPos
 
                 {/* Thumbnail */}
                 {post.thumbnailUrl ? (
-                  <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-lg">
+                  <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-lg">
                     <img
                       src={post.thumbnailUrl}
                       alt="Post thumbnail"
@@ -80,8 +80,8 @@ export const EnhancedTopPosts = ({ posts, title = "Top Performing Posts", maxPos
                     )}
                   </div>
                 ) : (
-                  <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-lg bg-secondary">
-                    <TypeIcon className="h-8 w-8 text-muted-foreground" />
+                  <div className="flex h-32 w-32 flex-shrink-0 items-center justify-center rounded-lg bg-secondary">
+                    <TypeIcon className="h-10 w-10 text-muted-foreground" />
                   </div>
                 )}
 
