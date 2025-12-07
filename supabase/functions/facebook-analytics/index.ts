@@ -96,7 +96,7 @@ async function getAppAccessToken(): Promise<string> {
 }
 
 // Fetch public page info (no user token required)
-async function fetchPublicPageInfo(pageId: string, accessToken: string): Promise<FacebookPage | null> {
+async function fetchPublicPageInfo(pageId: string, accessToken: string): Promise<{ page: FacebookPage | null; error?: string }> {
   const fields = 'id,name,picture.type(large),category,fan_count,followers_count,is_verified,overall_star_rating,about';
   
   const response = await fetch(
@@ -106,10 +106,25 @@ async function fetchPublicPageInfo(pageId: string, accessToken: string): Promise
   if (!response.ok) {
     const error = await response.json();
     console.error('Failed to fetch page info:', error);
-    return null;
+    
+    // Check for permission-related errors
+    if (error?.error?.code === 100) {
+      const message = error?.error?.message || '';
+      if (message.includes('pages_read_engagement') || message.includes('Page Public Content Access')) {
+        return { 
+          page: null, 
+          error: `Cannot access page "${pageId}". Your Facebook App requires "Page Public Content Access" feature approval. Visit developers.facebook.com to submit your app for review.`
+        };
+      }
+      if (message.includes('does not exist')) {
+        return { page: null, error: `Facebook page "${pageId}" does not exist or is not accessible.` };
+      }
+    }
+    
+    return { page: null, error: `Could not fetch page "${pageId}": ${error?.error?.message || 'Unknown error'}` };
   }
   
-  return await response.json();
+  return { page: await response.json() };
 }
 
 // Fetch public posts (limited data without page token)
@@ -238,11 +253,13 @@ async function processPageData(
   const effectiveToken = isOwnPage && userAccessToken ? userAccessToken : accessToken;
   
   // Fetch page info
-  const pageInfo = await fetchPublicPageInfo(pageId, effectiveToken);
+  const pageResult = await fetchPublicPageInfo(pageId, effectiveToken);
   
-  if (!pageInfo) {
-    throw new Error(`Invalid Facebook page: ${pageId}`);
+  if (!pageResult.page) {
+    throw new Error(pageResult.error || `Invalid Facebook page: ${pageId}`);
   }
+  
+  const pageInfo = pageResult.page;
   
   // Fetch posts
   const startTimestamp = Math.floor(new Date(startDate).getTime() / 1000);
