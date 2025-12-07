@@ -13,8 +13,9 @@ import { SinglePagePosts } from '@/components/dashboard/SinglePagePosts';
 import { EnhancedTopPosts } from '@/components/dashboard/EnhancedTopPosts';
 import { generateMockComparison, generateMonthlyReport } from '@/lib/mockData';
 import { generateComparisonPDF, generateMonthlyPDF } from '@/lib/pdfGenerator';
-import { generateEnhancedPosts } from '@/lib/socialMediaServices';
+import { fetchFacebookComparison, fetchFacebookMonthlyReport, isValidFacebookUrl } from '@/lib/facebookApi';
 import { ComparisonData, MonthlyReportData, TimeframeOption } from '@/types/analytics';
+import { EnhancedPost } from '@/types/socialMedia';
 import { Heart, Eye, Users, FileText, Download, GitCompare, CalendarRange } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -26,27 +27,48 @@ const Index = () => {
   const [monthlyData, setMonthlyData] = useState<MonthlyReportData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isPdfLoading, setIsPdfLoading] = useState(false);
+  const [useMockData, setUseMockData] = useState(false);
 
   const handleCompare = async (companyUrl: string, competitorUrl: string, timeframe: TimeframeOption, startDate?: Date, endDate?: Date) => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const data = generateMockComparison(companyUrl, competitorUrl, timeframe, startDate, endDate);
-    setComparisonData(data);
+    try {
+      // Try to fetch real data from Facebook API
+      const data = await fetchFacebookComparison(companyUrl, competitorUrl, timeframe, startDate, endDate);
+      setComparisonData(data);
+      setUseMockData(false);
+      toast.success('Real Facebook data fetched successfully!');
+    } catch (error) {
+      console.error('Failed to fetch Facebook data, using mock data:', error);
+      // Fall back to mock data
+      const data = generateMockComparison(companyUrl, competitorUrl, timeframe, startDate, endDate);
+      setComparisonData(data);
+      setUseMockData(true);
+      toast.warning('Using sample data. Configure Facebook API for real data.');
+    }
+    
     setIsLoading(false);
-    
-    toast.success('Comparison generated successfully!');
   };
 
   const handleMonthlyReport = async (pageUrl: string, timeframe: TimeframeOption, startDate?: Date, endDate?: Date) => {
     setIsLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 1500));
     
-    const data = generateMonthlyReport(pageUrl, timeframe, startDate, endDate);
-    setMonthlyData(data);
+    try {
+      // Try to fetch real data from Facebook API
+      const data = await fetchFacebookMonthlyReport(pageUrl, timeframe, startDate, endDate);
+      setMonthlyData(data);
+      setUseMockData(false);
+      toast.success('Real Facebook data fetched successfully!');
+    } catch (error) {
+      console.error('Failed to fetch Facebook data, using mock data:', error);
+      // Fall back to mock data
+      const data = generateMonthlyReport(pageUrl, timeframe, startDate, endDate);
+      setMonthlyData(data);
+      setUseMockData(true);
+      toast.warning('Using sample data. Configure Facebook API for real data.');
+    }
+    
     setIsLoading(false);
-    
-    toast.success('Monthly report generated successfully!');
   };
 
   const handleDownloadComparisonPDF = async () => {
@@ -80,9 +102,28 @@ const Index = () => {
     { metric: 'Shares', company: comparisonData.company.metrics.shares, competitor: comparisonData.competitor.metrics.shares },
   ] : [];
 
-  // Generate enhanced posts for display
-  const enhancedCompanyPosts = comparisonData ? generateEnhancedPosts(15) : [];
-  const enhancedMonthlyPosts = monthlyData ? generateEnhancedPosts(15) : [];
+  // Transform posts to enhanced format for display
+  const transformToEnhancedPosts = (posts: any[]): EnhancedPost[] => {
+    return posts.map((post) => ({
+      id: post.id,
+      date: post.date,
+      content: post.content,
+      postType: (post.type === 'video' ? 'video' : post.type === 'photo' ? 'photo' : 'text') as 'photo' | 'video' | 'carousel' | 'link' | 'text',
+      thumbnailUrl: post.thumbnail,
+      likes: post.likes,
+      comments: post.comments,
+      shares: post.shares,
+      saves: 0,
+      reach: post.likes * 10,
+      impressions: post.likes * 15,
+      engagementRate: post.engagementRate,
+      videoViews: post.type === 'video' ? post.likes * 5 : undefined,
+      avgWatchTime: post.type === 'video' ? 45 : undefined,
+    }));
+  };
+
+  const enhancedCompanyPosts = comparisonData ? transformToEnhancedPosts(comparisonData.company.posts) : [];
+  const enhancedMonthlyPosts = monthlyData ? transformToEnhancedPosts(monthlyData.page.posts) : [];
 
   return (
     <MainLayout 
